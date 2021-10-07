@@ -1,1 +1,8 @@
 /.vscode
+args.c
+args.h
+args.o
+checkFile
+debug.o
+main.o
+memory.o
