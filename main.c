@@ -1,10 +1,3 @@
-/**
- * @file main.c
- * @brief Description
- * @date 2018-1-1
- * @author name of author
- */
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,6 +18,9 @@ int main(int argc, char *argv[]) {
   if (cmdline_parser(argc, argv, &args) != 0) exit(1);
   filename = args.file_arg;
 
+  // TODO: Concluir mensagem de erro
+  if (argc < 2) ERROR(1, "[ERROR] must have at least one argument! usage: ...\n");
+
   /* Fork */
   pid_t pid;
   switch (pid = fork()) {
@@ -39,6 +35,5 @@ int main(int argc, char *argv[]) {
       wait(NULL);
       break;
   }
-
   return 0;
 }
