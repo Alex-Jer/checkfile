@@ -18,6 +18,10 @@ int main(int argc, char *argv[]) {
   if (cmdline_parser(argc, argv, &args) != 0) exit(1);
   filename = args.file_arg;
 
+  //* Array fixo?
+  char command[100];
+  sprintf(command, "file --mime-type %s | cut -d' ' -f2", filename);
+
   // TODO: Concluir mensagem de erro
   if (argc < 2) ERROR(1, "[ERROR] must have at least one argument! usage: ...\n");
 
@@ -28,7 +32,8 @@ int main(int argc, char *argv[]) {
       ERROR(1, "fork() failed\n");
       break;
     case 0: /* Child */
-      execlp("file", "file", filename, NULL);
+      execlp("bash", "bash", "-c", command, NULL);
+      //? Como capturar o stdout da função execlp?
       ERROR(1, "execlp() failed\n");
       break;
     default: /* Parent */
