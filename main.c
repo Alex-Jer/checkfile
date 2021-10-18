@@ -1,3 +1,5 @@
+// https://stackoverflow.com/questions/2605130/redirecting-exec-output-to-a-buffer-or-file
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -12,6 +14,8 @@
 #include "debug.h"
 #include "memory.h"
 
+#define MAX 100
+
 char *filename = NULL;
 
 int main(int argc, char *argv[]) {
@@ -20,10 +24,10 @@ int main(int argc, char *argv[]) {
   if (cmdline_parser(argc, argv, &args) != 0) exit(1);
   filename = args.file_arg;
 
-  //* Array fixo?
   int fd;
-  char command[100];
-  sprintf(command, "file --mime-type %s | cut -d' ' -f2", filename);
+  FILE *fptr = NULL;
+  char cmd[MAX], mimeType[MAX];
+  sprintf(cmd, "file --mime-type %s | cut -d' ' -f2", filename);
 
   // TODO: Concluir mensagem de erro
   if (argc < 2)
@@ -34,16 +38,25 @@ int main(int argc, char *argv[]) {
   switch (pid = fork()) {
     case -1: /* Error */
       ERROR(1, "fork() failed\n");
-      break;
-    case 0: /* Child */
+      break;  //* Break desnecessário
+    case 0:   /* Child */
       fd = open("tmp_output", O_WRONLY | O_CREAT, 0666);
-      dup2(fd, 1);
+      dup2(fd, 1);  // Opens the file descriptor on stdout (descriptor 1)
       close(fd);
-      execlp("bash", "bash", "-c", command, NULL);
+      //! É considerado uma chamada à shell?
+      execlp("bash", "bash", "-c", cmd, NULL);
       ERROR(1, "execlp() failed\n");
-      break;
-    default: /* Parent */
-      wait(NULL);
+      break;      //* Break desnecessário
+    default:      /* Parent */
+      wait(NULL); /* Waits for the child process to end */
+      fptr = fopen("tmp_output", "r");
+      if (!fptr) ERROR(1, "Could not open tmp_file!\n");
+      fgets(mimeType, 128, fptr);
+      mimeType[strlen(mimeType) - 1] = '\0';
+      //* if (strcmp(mimeType, "image/png") != 0) printf("Wrong file type!\n");
+      //* printf("%s\n", mimeType);
+      fclose(fptr);
+      remove("tmp_output");
       break;
   }
   return 0;
