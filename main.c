@@ -1,7 +1,9 @@
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -19,11 +21,13 @@ int main(int argc, char *argv[]) {
   filename = args.file_arg;
 
   //* Array fixo?
+  int fd;
   char command[100];
   sprintf(command, "file --mime-type %s | cut -d' ' -f2", filename);
 
   // TODO: Concluir mensagem de erro
-  if (argc < 2) ERROR(1, "[ERROR] must have at least one argument! usage: ...\n");
+  if (argc < 2)
+    ERROR(1, "[ERROR] must have at least one argument! usage: ...\n");
 
   /* Fork */
   pid_t pid;
@@ -32,8 +36,10 @@ int main(int argc, char *argv[]) {
       ERROR(1, "fork() failed\n");
       break;
     case 0: /* Child */
+      fd = open("tmp_output", O_WRONLY | O_CREAT, 0666);
+      dup2(fd, 1);
+      close(fd);
       execlp("bash", "bash", "-c", command, NULL);
-      //? Como capturar o stdout da função execlp?
       ERROR(1, "execlp() failed\n");
       break;
     default: /* Parent */
