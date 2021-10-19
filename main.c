@@ -14,7 +14,7 @@
 #include "debug.h"
 #include "memory.h"
 
-#define MAX 100
+#define MAX 128
 
 char *filename = NULL;
 
@@ -26,8 +26,8 @@ int main(int argc, char *argv[]) {
 
   int fd;
   FILE *fptr = NULL;
-  char cmd[MAX], mimeType[MAX];
-  sprintf(cmd, "file --mime-type %s | cut -d' ' -f2", filename);
+  char output[MAX];
+  char *mimeType;
 
   // TODO: Concluir mensagem de erro
   if (argc < 2)
@@ -43,18 +43,19 @@ int main(int argc, char *argv[]) {
       fd = open("tmp_output", O_WRONLY | O_CREAT, 0666);
       dup2(fd, 1);  // Opens the file descriptor on stdout (descriptor 1)
       close(fd);
-      //! É considerado uma chamada à shell?
-      execlp("bash", "bash", "-c", cmd, NULL);
+      execl("/bin/file", "file", "--mime-type", filename, NULL);
       ERROR(1, "execlp() failed\n");
       break;      //* Break desnecessário
     default:      /* Parent */
       wait(NULL); /* Waits for the child process to end */
       fptr = fopen("tmp_output", "r");
       if (!fptr) ERROR(1, "Could not open tmp_file!\n");
-      fgets(mimeType, 128, fptr);
+      fgets(output, MAX, fptr);
+      mimeType = strchr(output, ':');
+      mimeType += 2;
       mimeType[strlen(mimeType) - 1] = '\0';
-      //* if (strcmp(mimeType, "image/png") != 0) printf("Wrong file type!\n");
-      //* printf("%s\n", mimeType);
+      // if (strcmp(mimeType, "image/png") != 0) printf("Wrong file type!\n");
+      printf("%s\n", mimeType);
       fclose(fptr);
       remove("tmp_output");
       break;
