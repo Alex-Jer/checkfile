@@ -12,7 +12,7 @@ versiontext "versiontext needed (optional)"
 
 # Optional
 #option "num" n "number" int optional
-option "file" f "file" string typestr="filename" optional
+option "file" f "file" string typestr="filename" optional multiple
 option "batch" b "batch" string typestr="filename" optional
 option "dir" d "directory" string typestr="dirname" optional
 
