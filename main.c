@@ -16,24 +16,27 @@
 
 #define MAX 128
 
-char *filename = NULL;
+int validateFileType(char *extension, char *mimeType);
+
+//? Tem que ser global?
+char *filepath = NULL;
 
 int main(int argc, char *argv[]) {
   /* Gengetopt */
   struct gengetopt_args_info args;
-  if (cmdline_parser(argc, argv, &args) != 0) exit(1);
-  filename = args.file_arg;
+  if (cmdline_parser(argc, argv, &args) != 0)
+    exit(1);
+  filepath = args.file_arg;
 
   int fd;
   FILE *fptr = NULL;
-  char output[MAX];
-  char *mimeType;
+  char mimeType[MAX];
+  char *trueExtension, *extension = strrchr(filepath, '.') + 1, *filename = strrchr(filepath, '/') + 1;
 
   // TODO: Concluir mensagem de erro
   if (argc < 2)
     ERROR(1, "[ERROR] must have at least one argument! usage: ...\n");
 
-  /* Fork */
   pid_t pid;
   switch (pid = fork()) {
     case -1: /* Error */
@@ -43,22 +46,42 @@ int main(int argc, char *argv[]) {
       fd = open("tmp_output", O_WRONLY | O_CREAT, 0666);
       dup2(fd, 1);  // Opens the file descriptor on stdout (descriptor 1)
       close(fd);
-      execl("/bin/file", "file", "--mime-type", filename, NULL);
+      execl("/bin/file", "file", "--mime-type", "-b", filepath, NULL);
       ERROR(1, "execlp() failed\n");
       break;      //* Break desnecessário
     default:      /* Parent */
       wait(NULL); /* Waits for the child process to end */
       fptr = fopen("tmp_output", "r");
-      if (!fptr) ERROR(1, "Could not open tmp_file!\n");
-      fgets(output, MAX, fptr);
-      mimeType = strchr(output, ':');
-      mimeType += 2;
+      if (!fptr)
+        ERROR(1, "Could not open tmp_file!\n");
+      fgets(mimeType, MAX, fptr);
       mimeType[strlen(mimeType) - 1] = '\0';
-      // if (strcmp(mimeType, "image/png") != 0) printf("Wrong file type!\n");
-      printf("%s\n", mimeType);
+      trueExtension = strchr(mimeType, '/') + 1;
+
+      if (validateFileType(extension, trueExtension)) {
+        printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
+      } else {
+        printf("wrong file type\n");
+      }
+
+      //! Debug
+      // printf("%s\n", mimeType);
+      //! Debug
+
       fclose(fptr);
       remove("tmp_output");
       break;
   }
   return 0;
+}
+
+int validateFileType(char *extension, char *mimeType) {
+  if (strcmp(extension, mimeType) == 0) {
+    // printf("extension matches file type\n");
+    return 1;
+  }
+  return 0;
+  // if (!strcmp(extension, "jpg")) {
+  //   printf("is jpg\n");
+  // }
 }
