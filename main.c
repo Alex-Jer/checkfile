@@ -43,12 +43,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") && strcmp(extension, "png") &&
-      strcmp(extension, "mp4") && strcmp(extension, "zip") && strcmp(extension, "html")) {
-    fprintf(stderr, "Invalid\n");  // TODO: Concluir mensagem de erro
-    exit(1);
-  }
-
   pid_t pid;
   switch (pid = fork()) {
     case -1: /* Error */
@@ -66,15 +60,22 @@ int main(int argc, char *argv[]) {
       fptr = fopen("tmp_output", "r");
       fgets(mimeType, MAX, fptr);
       mimeType[strlen(mimeType) - 1] = '\0';
-      trueExtension = strchr(mimeType, '/') + 1;
 
-      if (!strcmp(extension, trueExtension)) {
-        printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
-      } else if (strcmp(extension, trueExtension) && !strcmp(trueExtension, "jpeg") && !strcmp(extension, "jpg")) {
-        printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
-      } else {
-        printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, trueExtension);
+      if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") &&
+          strcmp(extension, "png") && strcmp(extension, "mp4") && strcmp(extension, "zip") &&
+          strcmp(extension, "html")) {
+        fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimeType);
+        remove("tmp_output");
+        exit(1);
       }
+
+      trueExtension = strchr(mimeType, '/') + 1;
+      if (!strcmp(extension, trueExtension))
+        printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
+      else if (strcmp(extension, trueExtension) && !strcmp(trueExtension, "jpeg") && !strcmp(extension, "jpg"))
+        printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
+      else
+        printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, trueExtension);
 
       fclose(fptr);
       remove("tmp_output");
