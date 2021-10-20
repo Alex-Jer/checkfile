@@ -37,6 +37,11 @@ int main(int argc, char *argv[]) {
   if (argc < 2)
     ERROR(1, "[ERROR] must have at least one argument! usage: ...\n");
 
+  if (access(filepath, F_OK) != 0) {
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filepath);
+    exit(1);
+  }
+
   pid_t pid;
   switch (pid = fork()) {
     case -1: /* Error */
@@ -58,10 +63,10 @@ int main(int argc, char *argv[]) {
       mimeType[strlen(mimeType) - 1] = '\0';
       trueExtension = strchr(mimeType, '/') + 1;
 
-      if (validateFileType(extension, trueExtension)) {
+      if (!strcmp(extension, trueExtension)) {
         printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
       } else {
-        printf("wrong file type\n");
+        printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, trueExtension);
       }
 
       //! Debug
@@ -75,13 +80,8 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-int validateFileType(char *extension, char *mimeType) {
-  if (strcmp(extension, mimeType) == 0) {
-    // printf("extension matches file type\n");
-    return 1;
-  }
-  return 0;
-  // if (!strcmp(extension, "jpg")) {
-  //   printf("is jpg\n");
-  // }
-}
+// int validateFileType(char *extension, char *mimeType) {
+//   if (strcmp(extension, mimeType) == 0)
+//     return 1;
+//   return 0;
+// }
