@@ -62,20 +62,24 @@ int main(int argc, char *argv[]) {
     switch (pid) {
       case -1: /* Error */
         ERROR(1, "fork() failed!\n");
-        break;  //* Break desnecessário?
-      case 0:   /* Child */
+        break;
+      case 0: /* Child */
+        //! validar
         fd = open("tmp_output", O_WRONLY | O_CREAT, 0666);
-        dup2(fd, 1);  // Opens the file descriptor on stdout (descriptor 1)
+        // Open the file descriptor on stdout (descriptor 1)
+        if (dup2(fd, 1) == -1)
+          ERROR(1, "dup2() failed!\n");
         close(fd);
-        execl("/bin/file", "file", "--mime-type", "-b", filepath[i], NULL);
-        ERROR(1, "execl() failed!\n");
-        break;      //* Break desnecessário?
-      default:      /* Parent */
-        wait(NULL); /* Waits for the child process to end */
-        fptr = fopen("tmp_output", "r");
+        execlp("file", "file", "--mime-type", "-b", filepath[i], NULL);
+        ERROR(1, "execlp() failed!\n");
+        break;
+      default: /* Parent */
+        if (wait(NULL) == -1)
+          ERROR(1, "wait() failed!\n");
+        if ((fptr = fopen("tmp_output", "r")) == NULL)
+          ERROR(1, "fopen() failed!\n");
         fgets(mimeType, MAX, fptr);
         mimeType[strlen(mimeType) - 1] = '\0';
-
         if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") &&
             strcmp(extension, "png") && strcmp(extension, "mp4") && strcmp(extension, "zip") &&
             strcmp(extension, "html")) {
@@ -84,7 +88,6 @@ int main(int argc, char *argv[]) {
           fclose(fptr);
           continue;
         }
-
         trueExtension = strchr(mimeType, '/') + 1;
         if (!strcmp(extension, trueExtension))
           printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
@@ -92,7 +95,6 @@ int main(int argc, char *argv[]) {
           printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
         else
           printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, trueExtension);
-
         fclose(fptr);
         remove("tmp_output");
     }
