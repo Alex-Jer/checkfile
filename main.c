@@ -42,11 +42,20 @@ int main(int argc, char *argv[]) {
   if (args.dir_given)
     directorypath = args.dir_arg;
 
-  char mimeType[MAX];
-
   int nfiles = args.file_given;
   for (int i = 0; i < nfiles; i++) {
-    char *trueExtension, *extension = strrchr(filepath[i], '.') + 1, *filename = strrchr(filepath[i], '/') + 1;
+    char mimeType[MAX] = "\0";
+    char *trueExtension, *filename = NULL, *extension = strrchr(filepath[i], '.') + 1;
+
+    // If the given file is inside a directory
+    if (strchr(filepath[i], '/'))
+      filename = strrchr(filepath[i], '/') + 1;
+
+    // If the given file's name doesn't have an extension
+    if (!strchr(filepath[i], '.')) {
+      fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkFile\n", filepath[i]);
+      continue;
+    }
 
     // Check if the given file exists
     if (access(filepath[i], F_OK) != 0) {
@@ -54,9 +63,16 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
+    if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") && strcmp(extension, "png") &&
+        strcmp(extension, "mp4") && strcmp(extension, "zip") && strcmp(extension, "html")) {
+      fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimeType);
+      continue;
+    }
+
     int link[2];
     pipe(link);
     pid_t pid = fork();
+
     switch (pid) {
       case -1: /* Error */
         ERROR(1, "fork() failed!\n");
@@ -76,12 +92,6 @@ int main(int argc, char *argv[]) {
         mimeType[strlen(mimeType) - 1] = '\0';
         trueExtension = strchr(mimeType, '/') + 1;
 
-        if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") &&
-            strcmp(extension, "png") && strcmp(extension, "mp4") && strcmp(extension, "zip") &&
-            strcmp(extension, "html")) {
-          fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimeType);
-          continue;
-        }
         trueExtension = strchr(mimeType, '/') + 1;
         if (!strcmp(extension, trueExtension))
           printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
