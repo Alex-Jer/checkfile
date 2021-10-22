@@ -5,6 +5,8 @@
  * @author name of author
  */
 
+// https://stackoverflow.com/questions/7292642/grabbing-output-from-exec
+
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -19,7 +21,7 @@
 #include "debug.h"
 #include "memory.h"
 
-#define MAX 32760
+#define MAX 124
 
 //? Tem que ser global?
 char **filepath = NULL;
@@ -42,20 +44,13 @@ int main(int argc, char *argv[]) {
   if (args.dir_given)
     directorypath = args.dir_arg;
 
-  int nfiles = args.file_given;
-  for (int i = 0; i < nfiles; i++) {
-    char mimeType[MAX] = "\0";
-    char *trueExtension, *filename = NULL, *extension = strrchr(filepath[i], '.') + 1;
+  for (unsigned int i = 0; i < args.file_given; i++) {
+    char mimetype[MAX] = "\0";
+    char *filetype, *filename = filepath[i], *extension = strrchr(filepath[i], '.') + 1;
 
     // If the given file is inside a directory
     if (strchr(filepath[i], '/'))
       filename = strrchr(filepath[i], '/') + 1;
-
-    // If the given file's name doesn't have an extension
-    if (!strchr(filepath[i], '.')) {
-      fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkFile\n", filepath[i]);
-      continue;
-    }
 
     // Check if the given file exists
     if (access(filepath[i], F_OK) != 0) {
@@ -63,9 +58,9 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") && strcmp(extension, "png") &&
-        strcmp(extension, "mp4") && strcmp(extension, "zip") && strcmp(extension, "html")) {
-      fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimeType);
+    // If the given file's name doesn't have an extension
+    if (!strchr(filepath[i], '.')) {
+      fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkFile\n", filepath[i]);
       continue;
     }
 
@@ -78,7 +73,9 @@ int main(int argc, char *argv[]) {
         ERROR(1, "fork() failed!\n");
         break;
       case 0: /* Child */
-        dup2(link[1], STDOUT_FILENO);
+              // Change output to stdout
+        if (dup2(link[1], STDOUT_FILENO) == -1)
+          ERROR(1, "dup2() failed!\n");
         close(link[0]);
         close(link[1]);
         execlp("file", "file", "--mime-type", "-b", filepath[i], NULL);
@@ -88,17 +85,29 @@ int main(int argc, char *argv[]) {
         if (wait(NULL) == -1)
           ERROR(1, "wait() failed!\n");
         close(link[1]);
-        read(link[0], mimeType, sizeof(mimeType));
-        mimeType[strlen(mimeType) - 1] = '\0';
-        trueExtension = strchr(mimeType, '/') + 1;
 
-        trueExtension = strchr(mimeType, '/') + 1;
-        if (!strcmp(extension, trueExtension))
-          printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
-        else if (strcmp(extension, trueExtension) && !strcmp(trueExtension, "jpeg") && !strcmp(extension, "jpg"))
-          printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, trueExtension);
+        // Read the output from the child (Interprocess Communication)
+        if (read(link[0], mimetype, sizeof(mimetype)) == -1)
+          ERROR(1, "read() failed!\n");
+
+        mimetype[strlen(mimetype) - 1] = '\0';  // Removes the unecessary line break
+        filetype = strchr(mimetype, '/') + 1;   // Gets the file type from the MIME type
+
+        // Check if the file type is supported
+        if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") &&
+            strcmp(extension, "png") && strcmp(extension, "mp4") && strcmp(extension, "zip") &&
+            strcmp(extension, "html")) {
+          fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimetype);
+          continue;
+        }
+
+        // Check whether the extension matches the file type
+        if (!strcmp(extension, filetype))
+          printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, filetype);
+        else if (strcmp(extension, filetype) && !strcmp(filetype, "jpeg") && !strcmp(extension, "jpg"))
+          printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, filetype);
         else
-          printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, trueExtension);
+          printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, filetype);
     }
   }
   return 0;
