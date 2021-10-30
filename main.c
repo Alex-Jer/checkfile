@@ -21,8 +21,6 @@
 #include "debug.h"
 #include "functions.h"
 #include "memory.h"
-#include "validations.h"
-
 
 //? Tem que ser global?
 char **filepath = NULL;

@@ -10,6 +10,7 @@
 
 #include "args.h"
 #include "debug.h"
+#include "validations.h"
 
 #define MAX 124
 
