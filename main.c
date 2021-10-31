@@ -23,7 +23,6 @@
 #include "memory.h"
 
 //? Tem que ser global?
-char **filepath = NULL;
 char *directorypath = NULL;
 
 int main(int argc, char *argv[]) {
@@ -38,12 +37,19 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  if (args.file_given)
-    filepath = args.file_arg;
-  if (args.dir_given)
-    directorypath = args.dir_arg;
+  char **filepaths = NULL;
 
-  for (size_t i = 0; i < args.file_given; i++) check_file(filepath[i]);
+  if (args.file_given)
+    filepaths = args.file_arg;
+
+  // Analyses all the given files
+  for (size_t i = 0; i < args.file_given; i++) check_file(filepaths[i]);
+
+  // Analyses the files inside the given directory
+  if (args.dir_given) {
+    directorypath = args.dir_arg;
+    check_dir(directorypath);
+  }
 
   return 0;
 }

@@ -47,3 +47,29 @@ void check_file(char *filepath) {
       validate_extension(filename, extension, filetype);
   }
 }
+
+// Validates the files of a directory
+void check_dir(char *directorypath) {
+  // Ensure we can open the directory
+  DIR *pdir;
+  pdir = opendir(directorypath);
+  if (!pdir) {
+    fprintf(stderr, "Cannot open directory '%s'\n", directorypath);
+    exit(1);
+  }
+
+  char *dirname;
+  char filepath[MAX];
+
+  // Process each entry
+  while ((dirname = readdir(pdir)->d_name)) {
+    strcpy(filepath, directorypath);
+    if (!strcmp(dirname, ".."))
+      break;
+    strcat(strcat(filepath, "/"), dirname);
+    check_file(filepath);
+  }
+
+  // Close directory and exit
+  closedir(pdir);
+}
