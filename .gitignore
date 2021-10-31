@@ -1,5 +1,6 @@
 /.vscode/*.log
 /.vscode/settings.json
+/examples/locked.*
 args.c
 args.h
 args.o

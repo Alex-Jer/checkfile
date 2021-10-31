@@ -7,11 +7,19 @@ int errorCount = 0;
 // Check if the file is valid and ready to analyse
 int is_file_valid(char *filepath) {
   // Check if the given file exists
-  if (access(filepath, F_OK) != 0) {
+  if (access(filepath, F_OK)) {
     fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filepath);
     errorCount++;
     return 0;
   }
+
+  // Check if the user has enough permissions
+  if (access(filepath, R_OK)) {
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- Permission denied\n", filepath);
+    errorCount++;
+    return 0;
+  }
+
   // If the given file's name doesn't have an extension
   if (!strchr(filepath, '.')) {
     fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkFile\n", filepath);
@@ -21,9 +29,9 @@ int is_file_valid(char *filepath) {
 }
 
 // Check if the file type is supported
-int is_file_supported(char *filename, char *extension, char mimetype[]) {
-  if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") && strcmp(extension, "png") &&
-      strcmp(extension, "mp4") && strcmp(extension, "zip") && strcmp(extension, "html")) {
+int is_file_supported(char *filename, char *filetype, char mimetype[]) {
+  if (strcmp(filetype, "pdf") && strcmp(filetype, "gif") && strcmp(filetype, "jpeg") && strcmp(filetype, "png") &&
+      strcmp(filetype, "mp4") && strcmp(filetype, "zip") && strcmp(filetype, "html")) {
     fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimetype);
     return 0;
   }

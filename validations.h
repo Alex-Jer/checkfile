@@ -19,7 +19,7 @@ extern int mismatchCount;
 extern int errorCount;
 
 int is_file_valid(char *filepath);
-int is_file_supported(char *filename, char *extension, char mimetype[]);
+int is_file_supported(char *filename, char *filetype, char mimetype[]);
 void validate_extension(char *filename, char *extension, char *filetype);
 
 #endif /* VALIDATIONS_H_INCLUDED */

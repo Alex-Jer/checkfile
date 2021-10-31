@@ -40,8 +40,9 @@ void check_file(char *filepath) {
 
       mimetype[strlen(mimetype) - 1] = '\0';  // Removes the unecessary line break
       filetype = strchr(mimetype, '/') + 1;   // Gets the file type from the MIME type
+      // printf("===%s===\n", filetype);
 
-      if (!is_file_supported(filename, extension, mimetype))
+      if (!is_file_supported(filename, filetype, mimetype))
         return;
 
       validate_extension(filename, extension, filetype);
@@ -59,15 +60,16 @@ void check_dir(char *directorypath) {
     exit(1);
   }
 
-  char *dirname;
   char filepath[MAX];
+  struct dirent *pdirent;
 
   // Process each entry
-  while ((dirname = readdir(pdir)->d_name)) {
+  while ((pdirent = readdir(pdir))) {
     strcpy(filepath, directorypath);
-    if (!strcmp(dirname, ".."))
-      break;
-    strcat(strcat(filepath, "/"), dirname);
+    if (!strcmp(pdirent->d_name, "..") || !strcmp(pdirent->d_name, "."))
+      continue;
+    // printf("%s\n", pdirent->d_name);
+    strcat(strcat(filepath, "/"), pdirent->d_name);
     check_file(filepath);
   }
 
