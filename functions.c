@@ -53,8 +53,9 @@ void check_dir(char *directorypath) {
   // Ensure we can open the directory
   DIR *pdir;
   pdir = opendir(directorypath);
+
   if (!pdir) {
-    fprintf(stderr, "Cannot open directory '%s'\n", directorypath);
+    fprintf(stderr, "[ERROR] cannot open dir '%s' -- No such file or directory\n", directorypath);
     exit(1);
   }
 
@@ -70,6 +71,6 @@ void check_dir(char *directorypath) {
     check_file(filepath);
   }
 
-  // Close directory and exit
+  // Close directory
   closedir(pdir);
 }

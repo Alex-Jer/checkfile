@@ -51,5 +51,10 @@ int main(int argc, char *argv[]) {
     check_dir(directorypath);
   }
 
+  if (args.dir_given || args.batch_given) {
+    int totalCount = okCount + mismatchCount + errorCount;
+    printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, mismatchCount, errorCount);
+  }
+
   return 0;
 }
