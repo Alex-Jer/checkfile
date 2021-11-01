@@ -8,19 +8,7 @@
 
 // https://stackoverflow.com/questions/7292642/grabbing-output-from-exec
 
-#include <fcntl.h>
-#include <signal.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-
-#include "args.h"
-#include "debug.h"
 #include "functions.h"
-#include "memory.h"
 
 int continua = 1;
 
@@ -50,11 +38,11 @@ int main(int argc, char *argv[]) {
   act.sa_flags = 0;
   sigemptyset(&act.sa_mask);
 
-  // Captures SIGUSR1
+  /* Capture SIGUSR1 */
   if (sigaction(SIGUSR1, &act, NULL) < 0)
     ERROR(1, "sigaction - SIGUSR1");
 
-  // Captures SIGQUIT
+  /* Capture SIGQUIT */
   if (sigaction(SIGQUIT, &act, NULL) < 0)
     ERROR(2, "sigaction - SIGQUIT");
 
@@ -64,26 +52,26 @@ int main(int argc, char *argv[]) {
   if (args.file_given)
     filepaths = args.file_arg;
 
-  // Reads the given file and analyses its paths
+  /* Read the given file and analyses its paths */
   if (args.batch_given) {
     filelist = args.batch_arg;
     check_batch(filelist);
   } else
-    // Ignores SIGUSR1
+    /* Ignore SIGUSR1 */
     signal(SIGUSR1, SIG_IGN);
 
-  // Analyses the files inside the given directory
+  /* Analyse the files inside the given directory */
   if (args.dir_given) {
     char *directorypath = args.dir_arg;
     check_dir(directorypath);
   }
 
-  // Analyses all the given files
+  /* Analyse all the given files */
   for (size_t i = 0; i < args.file_given; i++) check_file(filepaths[i]);
 
   if (args.dir_given || args.batch_given) {
-    int totalCount = okCount + mismatchCount;
-    printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, mismatchCount, errorCount);
+    int totalCount = okCount + misCount;
+    printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, misCount, errCount);
   }
 
   // while (continua) {

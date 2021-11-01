@@ -11,6 +11,8 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,21 +24,23 @@
 
 #include "args.h"
 #include "debug.h"
+#include "functions.h"
+#include "memory.h"
 
 #define MAX 124
 
-// Stores the date and time the program started
+/* Stores the date and time at which the program was initiated */
 extern char timeFormatted[MAX];
 
-// Initialise the counters
+/* Initialise the counters */
 extern int okCount;
-extern int mismatchCount;
-extern int errorCount;
+extern int misCount;
+extern int errCount;
 
 int is_file_valid(char *filepath);
 int is_file_supported(char *filename, char *filetype, char mimetype[]);
 void validate_extension(char *filename, char *extension, char *filetype);
 void validate_dir(char *directorypath, DIR *pdir);
-void validate_batch(char *filelist, FILE *fp, struct stat statbuf);
+void validate_batch(char *filelist, FILE *fp);
 
 #endif /* VALIDATIONS_H_INCLUDED */

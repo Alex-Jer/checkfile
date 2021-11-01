@@ -12,7 +12,12 @@ char timeFormatted[MAX];
 char *currentFile = NULL;
 int fileCount = 0;
 
-// Handles SIGUSR1 and SIGQUIT
+/**
+ * @brief Handle SIGUSR1 and SIGQUIT
+ *
+ * @param signal int
+ * @return void
+ */
 void signal_handler(int signal) {
   int aux = errno;
   if (signal == SIGUSR1) {
@@ -23,12 +28,17 @@ void signal_handler(int signal) {
   errno = aux;
 }
 
-// Checks whether the extension of file given matches its MIME type
+/**
+ * @brief Check if the extension of the file matches its MIME type
+ *
+ * @param filepath char*
+ * @return void
+ */
 void check_file(char *filepath) {
   char mimetype[MAX] = "\0";
   char *filetype, *filename = filepath, *extension = strrchr(filepath, '.') + 1;
 
-  // If the given file is inside a directory
+  /* If the given file is inside a directory */
   if (strchr(filepath, '/'))
     filename = strrchr(filepath, '/') + 1;
 
@@ -44,7 +54,7 @@ void check_file(char *filepath) {
       ERROR(1, "fork() failed!\n");
       break;
     case 0: /* Child */
-            // Change output to stdout
+            /* Change output to stdout */
       if (dup2(link[1], STDOUT_FILENO) == -1)
         ERROR(1, "dup2() failed!\n");
       close(link[0]);
@@ -56,12 +66,12 @@ void check_file(char *filepath) {
       wait(NULL);
       close(link[1]);
 
-      // Read the output from the child (Interprocess Communication)
+      /* Read the output from the child (IPC) */
       if (read(link[0], mimetype, sizeof(mimetype)) == -1)
         ERROR(1, "read() failed!\n");
 
-      mimetype[strlen(mimetype) - 1] = '\0';  // Removes the unecessary line break
-      filetype = strchr(mimetype, '/') + 1;   // Gets the file type from the MIME type
+      mimetype[strlen(mimetype) - 1] = '\0'; /* Remove the unecessary line break */
+      filetype = strchr(mimetype, '/') + 1;  /* Get the file type from the MIME type */
 
       if (!is_file_supported(filename, filetype, mimetype))
         return;
@@ -72,44 +82,47 @@ void check_file(char *filepath) {
   }
 }
 
-// Validates the files of a directory
+/**
+ * @brief Validate the files of a directory
+ *
+ * @param directorypath char*
+ * @return void
+ */
 void check_dir(char *directorypath) {
-  // Ensure we can open the directory
-  DIR *pdir;
-  pdir = opendir(directorypath);
-
+  DIR *pdir = opendir(directorypath);
   validate_dir(directorypath, pdir);
 
   char filepath[MAX];
   struct dirent *pdirent;
 
-  // Process each entry
+  /* Process each entry */
   while ((pdirent = readdir(pdir))) {
     strcpy(filepath, directorypath);
-    if (!strcmp(pdirent->d_name, "..") || !strcmp(pdirent->d_name, "."))
+    if (!strcmp(pdirent->d_name, "..") || !strcmp(pdirent->d_name, ".")) /* Ignore . and .. */
       continue;
-    strcat(strcat(filepath, "/"), pdirent->d_name);
+    strcat(strcat(filepath, "/"), pdirent->d_name); /* Concatenate the filepath with the directory's name */
     check_file(filepath);
   }
-
-  // Close directory
   closedir(pdir);
 }
 
+/**
+ * @brief Validate the files listed inside a text file
+ *
+ * @param filelist char*
+ * @return void
+ */
 void check_batch(char *filelist) {
-  FILE *fp;
+  FILE *fp = fopen(filelist, "r");
   size_t len = 0;
   ssize_t read;
-  struct stat statbuf;
   char *line = NULL;
 
-  stat(filelist, &statbuf);
-  fp = fopen(filelist, "r");
+  validate_batch(filelist, fp);
 
-  validate_batch(filelist, fp, statbuf);
-
+  /* Read the file line by line */
   while ((read = getline(&line, &len, fp)) != -1) {
-    line[strcspn(line, "\n")] = 0;
+    line[strcspn(line, "\n")] = 0; /* Trim the unecessary linebreak */
     check_file(line);
   }
 
