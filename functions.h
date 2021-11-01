@@ -1,13 +1,19 @@
+/**
+ * @file functions.h
+ * @brief Functions to be used in main.c
+ * @date 2021-11-01
+ * @author Alexandre Jerónimo
+ * @author Leonardo Paulo
+ */
+
 #ifndef FUNCTIONS_H_INCLUDED
 #define FUNCTIONS_H_INCLUDED
 
-#include <dirent.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>

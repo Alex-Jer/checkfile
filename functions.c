@@ -1,3 +1,11 @@
+/**
+ * @file functions.c
+ * @brief Functions to be used in main.c
+ * @date 2021-11-01
+ * @author Alexandre Jerónimo
+ * @author Leonardo Paulo
+ */
+
 #include "functions.h"
 
 char timeFormatted[MAX];
@@ -70,10 +78,7 @@ void check_dir(char *directorypath) {
   DIR *pdir;
   pdir = opendir(directorypath);
 
-  if (!pdir) {
-    fprintf(stderr, "[ERROR] cannot open dir '%s' -- No such file or directory\n", directorypath);
-    exit(1);
-  }
+  validate_dir(directorypath, pdir);
 
   char filepath[MAX];
   struct dirent *pdirent;
@@ -93,19 +98,15 @@ void check_dir(char *directorypath) {
 
 void check_batch(char *filelist) {
   FILE *fp;
-  char *line = NULL;
   size_t len = 0;
   ssize_t read;
   struct stat statbuf;
+  char *line = NULL;
 
   stat(filelist, &statbuf);
   fp = fopen(filelist, "r");
 
-  // Checks if the file exists and if it's not a directory
-  if (!fp || S_ISDIR(statbuf.st_mode)) {
-    fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filelist);
-    exit(1);
-  }
+  validate_batch(filelist, fp, statbuf);
 
   while ((read = getline(&line, &len, fp)) != -1) {
     line[strcspn(line, "\n")] = 0;

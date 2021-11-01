@@ -1,3 +1,11 @@
+/**
+ * @file validations.c
+ * @brief Multiple validation functions to ensure a healthy execution of the program
+ * @date 2021-11-01
+ * @author Alexandre Jerónimo
+ * @author Leonardo Paulo
+ */
+
 #include "validations.h"
 
 int okCount = 0;
@@ -49,5 +57,21 @@ void validate_extension(char *filename, char *extension, char *filetype) {
   } else {
     printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, filetype);
     mismatchCount++;
+  }
+}
+
+// Checks if the directory exists
+void validate_dir(char *directorypath, DIR *pdir) {
+  if (!pdir) {
+    fprintf(stderr, "[ERROR] cannot open dir '%s' -- No such file or directory\n", directorypath);
+    exit(1);
+  }
+}
+
+// Checks if the file exists and if it's not a directory
+void validate_batch(char *filelist, FILE *fp, struct stat statbuf) {
+  if (!fp || S_ISDIR(statbuf.st_mode)) {
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filelist);
+    exit(1);
   }
 }

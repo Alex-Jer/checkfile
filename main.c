@@ -1,8 +1,9 @@
 /**
  * @file main.c
- * @brief Description
- * @date 2021-1-1
- * @author name of author
+ * @brief This program checks whether the file extension of the given file(s) matches its MIME type
+ * @date 2021-11-01
+ * @author Alexandre Jerónimo
+ * @author Leonardo Paulo
  */
 
 // https://stackoverflow.com/questions/7292642/grabbing-output-from-exec
