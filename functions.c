@@ -1,11 +1,16 @@
 #include "functions.h"
 
+char timeFormatted[MAX];
+char *currentFile = NULL;
+int fileCount = 0;
+
 // Handles SIGUSR1 and SIGQUIT
 void signal_handler(int signal) {
   int aux = errno;
-  if (signal == SIGUSR1)
-    printf("Signal SIGUSR1 (%d)\n", signal);
-  else if (signal == SIGQUIT)
+  if (signal == SIGUSR1) {
+    printf("Program start time: %s\n", timeFormatted);
+    printf("Processing file #%d: '%s'\n", fileCount, currentFile);
+  } else if (signal == SIGQUIT)
     printf("Captured SIGQUIT signal (sent by PID: %d). Use SIGINT to terminate application.\n", signal);
   errno = aux;
 }
@@ -40,8 +45,7 @@ void check_file(char *filepath) {
       ERROR(1, "execlp() failed!\n");
       break;
     default: /* Parent */
-      if (wait(NULL) == -1)
-        ERROR(1, "wait() failed!\n");
+      wait(NULL);
       close(link[1]);
 
       // Read the output from the child (Interprocess Communication)
@@ -55,6 +59,8 @@ void check_file(char *filepath) {
         return;
 
       validate_extension(filename, extension, filetype);
+      currentFile = filename;
+      fileCount++;
   }
 }
 

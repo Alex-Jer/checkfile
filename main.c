@@ -21,9 +21,16 @@
 #include "functions.h"
 #include "memory.h"
 
-// int continua = 1;
+int continua = 1;
 
 int main(int argc, char *argv[]) {
+  time_t rawtime;
+  struct tm *tm;
+
+  time(&rawtime);
+  tm = localtime(&rawtime);
+  strftime(timeFormatted, MAX, "%Y.%m.%d_%H:%M:%S", tm);
+
   /* Gengetopt */
   struct gengetopt_args_info args;
   if (cmdline_parser(argc, argv, &args) != 0)

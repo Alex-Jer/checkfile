@@ -1,4 +1,5 @@
 examples/docx_true.docx
+examples/docx_fake.docx
 examples/gif_true.gif
 examples/locked.gif
 examples/html_true.html
