@@ -1,5 +1,15 @@
 #include "functions.h"
 
+// Handles SIGUSR1 and SIGQUIT
+void signal_handler(int signal) {
+  int aux = errno;
+  if (signal == SIGUSR1)
+    printf("Signal SIGUSR1 (%d)\n", signal);
+  else if (signal == SIGQUIT)
+    printf("Captured SIGQUIT signal (sent by PID: %d). Use SIGINT to terminate application.\n", signal);
+  errno = aux;
+}
+
 // Checks whether the extension of file given matches its MIME type
 void check_file(char *filepath) {
   char mimetype[MAX] = "\0";
@@ -75,11 +85,4 @@ void check_dir(char *directorypath) {
   closedir(pdir);
 }
 
-void signal_handler(int signal) {
-  int aux = errno;
-  if (signal == SIGUSR1)
-    printf("Signal SIGUSR1 (%d)\n", signal);
-  else if (signal == SIGQUIT)
-    printf("Captured SIGQUIT signal (sent by PID: %d). Use SIGINT to terminate application.\n", signal);
-  errno = aux;
-}
+// void check_batch(char *filepath) {}

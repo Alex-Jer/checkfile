@@ -40,12 +40,11 @@ int main(int argc, char *argv[]) {
   }
 
   char **filepaths = NULL;
+  char *filelist = NULL;
   struct sigaction act;
 
   act.sa_handler = signal_handler;
   act.sa_flags = 0;
-
-  /* Mascara sem sinais para nao os bloquear */
   sigemptyset(&act.sa_mask);
 
   // Captures SIGUSR1
@@ -62,7 +61,9 @@ int main(int argc, char *argv[]) {
   if (args.file_given)
     filepaths = args.file_arg;
 
-  if (!args.batch_given)
+  if (args.batch_given)
+    filelist = args.batch_arg;
+  else
     signal(SIGUSR1, SIG_IGN);
 
   // Analyses all the given files
@@ -72,6 +73,30 @@ int main(int argc, char *argv[]) {
   if (args.dir_given) {
     directorypath = args.dir_arg;
     check_dir(directorypath);
+  }
+
+  if (args.batch_given) {
+    FILE *fp;
+    char *line = NULL;
+    size_t len = 0;
+    ssize_t read;
+    struct stat statbuf;
+
+    stat(filelist, &statbuf);
+    fp = fopen(filelist, "r");
+
+    // Checks if the file exists and if it's not a directory
+    if (!fp || S_ISDIR(statbuf.st_mode)) {
+      fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file\n", filelist);
+      exit(1);
+    }
+
+    while ((read = getline(&line, &len, fp)) != -1) {
+      line[strcspn(line, "\n")] = 0;
+      check_file(line);
+    }
+
+    fclose(fp);
   }
 
   if (args.dir_given || args.batch_given) {
