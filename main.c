@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -21,9 +20,6 @@
 #include "debug.h"
 #include "functions.h"
 #include "memory.h"
-
-//? Tem que ser global?
-char *directorypath = NULL;
 
 // int continua = 1;
 
@@ -34,8 +30,7 @@ int main(int argc, char *argv[]) {
     exit(1);
 
   if (argc < 2) {
-    // TODO: Concluir mensagem de erro
-    fprintf(stderr, "[ERROR] must have at least one argument! usage: ...\n");
+    printf("Usage: checkFile [OPTION]...\nTry 'checkFile --help' for more information.\n");
     exit(1);
   }
 
@@ -61,43 +56,22 @@ int main(int argc, char *argv[]) {
   if (args.file_given)
     filepaths = args.file_arg;
 
-  if (args.batch_given)
+  // Reads the given file and analyses its paths
+  if (args.batch_given) {
     filelist = args.batch_arg;
-  else
+    check_batch(filelist);
+  } else
+    // Ignores SIGUSR1
     signal(SIGUSR1, SIG_IGN);
-
-  // Analyses all the given files
-  for (size_t i = 0; i < args.file_given; i++) check_file(filepaths[i]);
 
   // Analyses the files inside the given directory
   if (args.dir_given) {
-    directorypath = args.dir_arg;
+    char *directorypath = args.dir_arg;
     check_dir(directorypath);
   }
 
-  if (args.batch_given) {
-    FILE *fp;
-    char *line = NULL;
-    size_t len = 0;
-    ssize_t read;
-    struct stat statbuf;
-
-    stat(filelist, &statbuf);
-    fp = fopen(filelist, "r");
-
-    // Checks if the file exists and if it's not a directory
-    if (!fp || S_ISDIR(statbuf.st_mode)) {
-      fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file\n", filelist);
-      exit(1);
-    }
-
-    while ((read = getline(&line, &len, fp)) != -1) {
-      line[strcspn(line, "\n")] = 0;
-      check_file(line);
-    }
-
-    fclose(fp);
-  }
+  // Analyses all the given files
+  for (size_t i = 0; i < args.file_given; i++) check_file(filepaths[i]);
 
   if (args.dir_given || args.batch_given) {
     int totalCount = okCount + mismatchCount;

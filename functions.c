@@ -85,4 +85,26 @@ void check_dir(char *directorypath) {
   closedir(pdir);
 }
 
-// void check_batch(char *filepath) {}
+void check_batch(char *filelist) {
+  FILE *fp;
+  char *line = NULL;
+  size_t len = 0;
+  ssize_t read;
+  struct stat statbuf;
+
+  stat(filelist, &statbuf);
+  fp = fopen(filelist, "r");
+
+  // Checks if the file exists and if it's not a directory
+  if (!fp || S_ISDIR(statbuf.st_mode)) {
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filelist);
+    exit(1);
+  }
+
+  while ((read = getline(&line, &len, fp)) != -1) {
+    line[strcspn(line, "\n")] = 0;
+    check_file(line);
+  }
+
+  fclose(fp);
+}
