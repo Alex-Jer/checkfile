@@ -1,21 +1,10 @@
-package "Example of .ggo file"
+package "checkFile"
 version "1.0"
-purpose "Simple example (optional)"
-description "description needed (optional)"
-versiontext "versiontext needed (optional)"
+usage "checkFile [OPTION]..."
+purpose "Check if a file's extension matches its original file type"
+description "Example: checkFile -d /directory/ -b /example/list_of_files.txt -f example.pdf"
+versiontext "Version 1.0"
 
-#----------------------------
-# independent options
-#----------------------------
-# Mandatory option
-#option "folder" f "folder" string typestr="dirname" required
-
-# Optional
-#option "num" n "number" int optional
-option "file" f "file" string typestr="filename" optional multiple
-option "batch" b "batch" string typestr="filename" optional
+option "file" f "file" string typestr="filepath" optional multiple
+option "batch" b "batch" string typestr="filepath" optional
 option "dir" d "directory" string typestr="dirname" optional
-
-#
-# NOTE: support for this file needs to be enabled in 'makefile'
-#
