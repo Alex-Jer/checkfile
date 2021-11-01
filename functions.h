@@ -17,5 +17,6 @@
 
 void check_file(char *filepath);
 void check_dir(char *directorypath);
+void signal_handler(int signal);
 
 #endif /* FUNCTIONS_H_INCLUDED */

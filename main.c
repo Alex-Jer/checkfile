@@ -7,7 +7,6 @@
 
 // https://stackoverflow.com/questions/7292642/grabbing-output-from-exec
 
-#include <errno.h>
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
@@ -26,7 +25,7 @@
 //? Tem que ser global?
 char *directorypath = NULL;
 
-void handle_signal(int signal);
+// int continua = 1;
 
 int main(int argc, char *argv[]) {
   /* Gengetopt */
@@ -40,31 +39,25 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  struct sigaction act;
   char **filepaths = NULL;
+  struct sigaction act;
 
-  /* Regista rotina de tratamento de sinais  */
-  act.sa_handler = handle_signal;
-
-  /* Comportamento por omissao -- fidedigno */
+  act.sa_handler = signal_handler;
   act.sa_flags = 0;
 
   /* Mascara sem sinais para nao os bloquear */
   sigemptyset(&act.sa_mask);
 
-  /* Captura do sinal SIGUSR1 */
-  if (sigaction(SIGUSR1, &act, NULL) < 0) {
+  // Captures SIGUSR1
+  if (sigaction(SIGUSR1, &act, NULL) < 0)
     ERROR(1, "sigaction - SIGUSR1");
-  }
 
-  /* Captura do sinal SIGQUIT */
-  if (sigaction(SIGQUIT, &act, NULL) < 0) {
+  // Captures SIGQUIT
+  if (sigaction(SIGQUIT, &act, NULL) < 0)
     ERROR(2, "sigaction - SIGQUIT");
-  }
 
-  /* Informa utilizador do funcionamento do programa */
-  printf("O programa esta pronto a receber os signals SIGQUIT e SIGUSR1\n");
-  printf("PID do processo: %d\n", getpid());
+  // printf("O programa esta pronto a receber os signals SIGQUIT e SIGUSR1\n");
+  // printf("PID do processo: %d\n", getpid());
 
   if (args.file_given)
     filepaths = args.file_arg;
@@ -86,20 +79,10 @@ int main(int argc, char *argv[]) {
     printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, mismatchCount, errorCount);
   }
 
+  // while (continua) {
+  //   pause();
+  //   printf("Pause interrompido\n");
+  // }
+
   return 0;
-}
-
-void handle_signal(int signal) {
-  int aux;
-  /* Copia da variavel global errno */
-  aux = errno;
-
-  if (signal == SIGUSR1) {
-    printf("Recebi o sinal SIGUSR1 (%d)\n", signal);
-  } else if (signal == SIGQUIT) {
-    printf("Captured SIGQUIT signal (sent by PID: %d). Use SIGINT to terminate application.\n", signal);
-  }
-
-  /* Restaura valor da variavel global errno */
-  errno = aux;
 }

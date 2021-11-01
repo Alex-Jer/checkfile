@@ -40,7 +40,6 @@ void check_file(char *filepath) {
 
       mimetype[strlen(mimetype) - 1] = '\0';  // Removes the unecessary line break
       filetype = strchr(mimetype, '/') + 1;   // Gets the file type from the MIME type
-      // printf("===%s===\n", filetype);
 
       if (!is_file_supported(filename, filetype, mimetype))
         return;
@@ -68,11 +67,19 @@ void check_dir(char *directorypath) {
     strcpy(filepath, directorypath);
     if (!strcmp(pdirent->d_name, "..") || !strcmp(pdirent->d_name, "."))
       continue;
-    // printf("%s\n", pdirent->d_name);
     strcat(strcat(filepath, "/"), pdirent->d_name);
     check_file(filepath);
   }
 
   // Close directory
   closedir(pdir);
+}
+
+void signal_handler(int signal) {
+  int aux = errno;
+  if (signal == SIGUSR1)
+    printf("Signal SIGUSR1 (%d)\n", signal);
+  else if (signal == SIGQUIT)
+    printf("Captured SIGQUIT signal (sent by PID: %d). Use SIGINT to terminate application.\n", signal);
+  errno = aux;
 }

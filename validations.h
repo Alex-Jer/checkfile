@@ -1,6 +1,7 @@
 #ifndef VALIDATIONS_H_INCLUDED
 #define VALIDATIONS_H_INCLUDED
 
+#include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
