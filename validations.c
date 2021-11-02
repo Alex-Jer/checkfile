@@ -46,6 +46,10 @@ int is_file_valid(char *filepath) {
 int is_file_supported(char *filename, char *filetype, char mimetype[]) {
   if (strcmp(filetype, "pdf") && strcmp(filetype, "gif") && strcmp(filetype, "jpeg") && strcmp(filetype, "png") &&
       strcmp(filetype, "mp4") && strcmp(filetype, "zip") && strcmp(filetype, "html")) {
+    if (!strcmp(filetype, "x-empty")) {
+      fprintf(stderr, "[INFO] '%s': file must not be empty\n", filename);
+      return 0;
+    }
     fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimetype);
     return 0;
   }
