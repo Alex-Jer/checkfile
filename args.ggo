@@ -2,7 +2,7 @@ package "checkFile"
 version "1.0"
 usage "checkFile [OPTION]..."
 purpose "Check if a file's extension matches its original file type"
-description "Example: checkFile -d /directory/ -b /example/list_of_files.txt -f example.pdf"
+description "Example: checkFile -d /directory/ -b /example/list_of_files.txt -f example.pdf\nSupported file types: PDF, GIF, JPG, PNG, MP4, ZIP, HTML.\nAuthors: - Alexandre Jerónimo / 2201799\n         - Leonardo Paulo / 2201783"
 versiontext "Version 1.0"
 
 option "file" f "file" string typestr="filepath" optional multiple
