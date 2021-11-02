@@ -42,6 +42,7 @@ void check_file(char *filepath) {
   if (strchr(filepath, '/'))
     filename = strrchr(filepath, '/') + 1;
 
+  /* If the given file is invalid */
   if (!is_file_valid(filepath))
     return;
 
@@ -59,13 +60,12 @@ void check_file(char *filepath) {
         ERROR(1, "dup2() failed!\n");
       close(link[0]);
       close(link[1]);
+      /* Run the file command */
       execlp("file", "file", "--mime-type", "-b", filepath, NULL);
       ERROR(1, "execlp() failed!\n");
       break;
     default: /* Parent */
       wait(NULL);
-      close(link[1]);
-
       /* Read the output from the child (IPC) */
       if (read(link[0], mimetype, sizeof(mimetype)) == -1)
         ERROR(1, "read() failed!\n");

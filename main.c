@@ -16,6 +16,7 @@ int main(int argc, char *argv[]) {
   time_t rawtime;
   struct tm *tm;
 
+  /* Stores time at which the program was initiated */
   time(&rawtime);
   tm = localtime(&rawtime);
   strftime(timeFormatted, MAX, "%Y.%m.%d_%H:%M:%S", tm);
@@ -34,6 +35,7 @@ int main(int argc, char *argv[]) {
   char *filelist = NULL;
   struct sigaction act;
 
+  /* Prepare the signal handler function */
   act.sa_handler = signal_handler;
   act.sa_flags = 0;
   sigemptyset(&act.sa_mask);
@@ -69,6 +71,7 @@ int main(int argc, char *argv[]) {
   /* Analyse all the given files */
   for (size_t i = 0; i < args.file_given; i++) check_file(filepaths[i]);
 
+  /* Prints a summary of the analysed files on -d and -b modes */
   if (args.dir_given || args.batch_given) {
     int totalCount = okCount + misCount;
     printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, misCount, errCount);
