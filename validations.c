@@ -19,16 +19,9 @@ int errCount = 0;
  * @return int
  */
 int is_file_valid(char *filepath) {
-  /* Check if the given file exists */
-  if (access(filepath, F_OK)) {
-    fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filepath);
-    errCount++;
-    return 0;
-  }
-
-  /* Check if the user has enough permissions */
-  if (access(filepath, R_OK)) {
-    fprintf(stderr, "[ERROR] cannot open file '%s' -- Permission denied\n", filepath);
+  /* Check if the given file exists and if the user has enough permissions */
+  if (access(filepath, F_OK) || access(filepath, R_OK)) {
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- %s\n", filepath, strerror(errno));
     errCount++;
     return 0;
   }
@@ -89,7 +82,7 @@ void validate_extension(char *filename, char *extension, char *filetype) {
  */
 void validate_dir(char *directorypath, DIR *pdir) {
   if (!pdir) {
-    fprintf(stderr, "[ERROR] cannot open dir '%s' -- No such file or directory\n", directorypath);
+    fprintf(stderr, "[ERROR] cannot open dir '%s' -- %s\n", directorypath, strerror(errno));
     exit(1);
   }
 }
@@ -105,7 +98,7 @@ void validate_batch(char *filelist, FILE *fp) {
   struct stat statbuf;
   stat(filelist, &statbuf);
   if (!fp || S_ISDIR(statbuf.st_mode)) {
-    fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filelist);
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- %s\n", filelist, errno);
     exit(1);
   }
 }
