@@ -1,10 +1,6 @@
 /.vscode/*.log
 /.vscode/settings.json
 /examples/locked.*
-args.c
-args.h
-args.o
+*.o
+args.*
 checkFile
-debug.o
-main.o
-memory.o
