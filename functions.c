@@ -90,7 +90,9 @@ void check_file(char *filepath) {
  */
 void check_dir(char *directorypath) {
   DIR *pdir = opendir(directorypath);
+
   validate_dir(directorypath, pdir);
+  printf("[INFO] analyzing files of directory '%s'\n", directorypath);
 
   char filepath[MAX];
   struct dirent *pdirent;
@@ -119,6 +121,7 @@ void check_batch(char *filelist) {
   char *line = NULL;
 
   validate_batch(filelist, fp);
+  printf("[INFO] analyzing files listed in '%s'\n", filelist);
 
   /* Read the file line by line */
   while ((read = getline(&line, &len, fp)) != -1) {

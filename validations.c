@@ -98,7 +98,7 @@ void validate_batch(char *filelist, FILE *fp) {
   struct stat statbuf;
   stat(filelist, &statbuf);
   if (!fp || S_ISDIR(statbuf.st_mode)) {
-    fprintf(stderr, "[ERROR] cannot open file '%s' -- %s\n", filelist, errno);
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- %s\n", filelist, strerror(errno));
     exit(1);
   }
 }
