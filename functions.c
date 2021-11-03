@@ -91,7 +91,9 @@ void check_file(char *filepath) {
 void check_dir(char *directorypath) {
   DIR *pdir = opendir(directorypath);
 
-  validate_dir(directorypath, pdir);
+  if (!is_dir_valid(directorypath, pdir))
+    return;
+
   printf("[INFO] analyzing files of directory '%s'\n", directorypath);
 
   char filepath[MAX];
@@ -120,7 +122,9 @@ void check_batch(char *filelist) {
   ssize_t read;
   char *line = NULL;
 
-  validate_batch(filelist, fp);
+  if (!is_batch_valid(filelist, fp))
+    return;
+
   printf("[INFO] analyzing files listed in '%s'\n", filelist);
 
   /* Read the file line by line */

@@ -8,6 +8,7 @@
 
 #include "validations.h"
 
+/* Initialise the counters */
 int okCount = 0;
 int misCount = 0;
 int errCount = 0;
@@ -44,13 +45,47 @@ int is_file_valid(char *filepath) {
  * @return int
  */
 int is_file_supported(char *filename, char *filetype, char mimetype[]) {
+  /* If the file type isn't PDF, GIF, JPG, PNG, MP4, ZIP or HTML */
   if (strcmp(filetype, "pdf") && strcmp(filetype, "gif") && strcmp(filetype, "jpeg") && strcmp(filetype, "png") &&
       strcmp(filetype, "mp4") && strcmp(filetype, "zip") && strcmp(filetype, "html")) {
+    /* If the file is empty */
     if (!strcmp(filetype, "x-empty")) {
       fprintf(stderr, "[INFO] '%s': file must not be empty\n", filename);
       return 0;
     }
     fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimetype);
+    return 0;
+  }
+  return 1;
+}
+
+/**
+ * @brief Return 1 if the directory is valid, else return 0
+ *
+ * @param directorypath char*
+ * @param pdir DIR*
+ * @return int
+ */
+int is_dir_valid(char *directorypath, DIR *pdir) {
+  if (!pdir) {
+    fprintf(stderr, "[ERROR] cannot open dir '%s' -- %s\n", directorypath, strerror(errno));
+    return 0;
+  }
+  return 1;
+}
+
+/**
+ * @brief Return 1 if the file is valid, else return 0
+ *
+ * @param filelist char*
+ * @param fp FILE*
+ * @return int
+ */
+int is_batch_valid(char *filelist, FILE *fp) {
+  struct stat statbuf;
+  stat(filelist, &statbuf);
+  if (!fp || S_ISDIR(statbuf.st_mode)) {
+    fprintf(stderr, "[ERROR] cannot open file '%s' -- %s\n", filelist, strerror(errno));
     return 0;
   }
   return 1;
@@ -74,35 +109,5 @@ void validate_extension(char *filename, char *extension, char *filetype) {
   } else {
     printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, filetype);
     misCount++;
-  }
-}
-
-/**
- * @brief Check if the directory exists
- *
- * @param directorypath char*
- * @param pdir DIR*
- * @return void
- */
-void validate_dir(char *directorypath, DIR *pdir) {
-  if (!pdir) {
-    fprintf(stderr, "[ERROR] cannot open dir '%s' -- %s\n", directorypath, strerror(errno));
-    exit(1);
-  }
-}
-
-/**
- * @brief Check if the file exists and if it's not a directory
- *
- * @param filelist char*
- * @param fp FILE*
- * @return void
- */
-void validate_batch(char *filelist, FILE *fp) {
-  struct stat statbuf;
-  stat(filelist, &statbuf);
-  if (!fp || S_ISDIR(statbuf.st_mode)) {
-    fprintf(stderr, "[ERROR] cannot open file '%s' -- %s\n", filelist, strerror(errno));
-    exit(1);
   }
 }

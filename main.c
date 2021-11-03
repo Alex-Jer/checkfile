@@ -10,7 +10,7 @@
 
 #include "functions.h"
 
-int continua = 1;
+// int continua = 1;
 
 int main(int argc, char *argv[]) {
   time_t rawtime;
@@ -31,8 +31,6 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  char **filepaths = NULL;
-  char *filelist = NULL;
   struct sigaction act;
 
   /* Prepare the signal handler function */
@@ -51,25 +49,26 @@ int main(int argc, char *argv[]) {
   // printf("O programa esta pronto a receber os signals SIGQUIT e SIGUSR1\n");
   // printf("PID do processo: %d\n", getpid());
 
-  if (args.file_given)
-    filepaths = args.file_arg;
+  /* Analyse all the files given through -f */
+  if (args.file_given) {
+    char **filepaths = args.file_arg;
+    size_t nFiles = args.file_given;
+    for (size_t i = 0; i < nFiles; i++) check_file(filepaths[i]);
+  }
 
-  /* Read the given file and analyses its paths */
+  /* Read the given -b file and analyses its paths */
   if (args.batch_given) {
-    filelist = args.batch_arg;
+    char *filelist = args.batch_arg;
     check_batch(filelist);
   } else
-    /* Ignore SIGUSR1 */
+    /* Ignore SIGUSR1 for -f and -d modes */
     signal(SIGUSR1, SIG_IGN);
 
-  /* Analyse the files inside the given directory */
+  /* Analyse the files inside the given directory (-d) */
   if (args.dir_given) {
     char *directorypath = args.dir_arg;
     check_dir(directorypath);
   }
-
-  /* Analyse all the given files */
-  for (size_t i = 0; i < args.file_given; i++) check_file(filepaths[i]);
 
   /* Prints a summary of the analysed files on -d and -b modes */
   if (args.dir_given || args.batch_given) {
