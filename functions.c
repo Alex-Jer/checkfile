@@ -52,23 +52,23 @@ void check_file(char *filepath) {
 
   switch (pid) {
     case -1: /* Error */
-      ERROR(1, "fork() failed!\n");
+      ERROR(1, "fork() failed");
       break;
     case 0: /* Child */
             /* Change output to stdout */
       if (dup2(link[1], STDOUT_FILENO) == -1)
-        ERROR(1, "dup2() failed!\n");
+        ERROR(1, "dup2() failed");
       close(link[0]);
       close(link[1]);
       /* Run the file command */
       execlp("file", "file", "--mime-type", "-b", filepath, NULL);
-      ERROR(1, "execlp() failed!\n");
+      ERROR(1, "execlp() failed");
       break;
     default: /* Parent */
       wait(NULL);
       /* Read the output from the child (IPC) */
       if (read(link[0], mimetype, sizeof(mimetype)) == -1)
-        ERROR(1, "read() failed!\n");
+        ERROR(1, "read() failed");
 
       mimetype[strlen(mimetype) - 1] = '\0'; /* Remove the unecessary line break */
       filetype = strchr(mimetype, '/') + 1;  /* Get the file type from the MIME type */
