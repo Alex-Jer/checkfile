@@ -6,11 +6,7 @@
  * @author Leonardo Paulo
  */
 
-// https://stackoverflow.com/questions/7292642/grabbing-output-from-exec
-
 #include "functions.h"
-
-// int continua = 1;
 
 int main(int argc, char *argv[]) {
   time_t rawtime;
@@ -46,9 +42,6 @@ int main(int argc, char *argv[]) {
   if (sigaction(SIGQUIT, &act, NULL) < 0)
     ERROR(2, "sigaction - SIGQUIT");
 
-  // printf("O programa esta pronto a receber os signals SIGQUIT e SIGUSR1\n");
-  // printf("PID do processo: %d\n", getpid());
-
   /* Analyse all the files given through -f */
   if (args.file_given) {
     char **filepaths = args.file_arg;
@@ -75,11 +68,6 @@ int main(int argc, char *argv[]) {
     int totalCount = okCount + misCount + errCount;
     printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, misCount, errCount);
   }
-
-  // while (continua) {
-  //   pause();
-  //   printf("Pause interrompido\n");
-  // }
 
   return 0;
 }
