@@ -96,21 +96,22 @@ void check_dir(char *directorypath) {
 
   printf("[INFO] analyzing files of directory '%s'\n", directorypath);
 
-  // TODO: filepath tem de ser ilimitado (mem. dinâmica)
-  char filepath[MAX];
+  char *filepath = NULL;
   struct dirent *pdirent;
-  struct stat statbuf;
 
   /* Process each entry */
   while ((pdirent = readdir(pdir))) {
-    // strcpy(filepath, directorypath);
-    // Substituir por stat() macro S_ISDIR
-    printf("===filepath: %s===\n===directorypath: %s===\n", filepath, directorypath);
-    if (!strcmp(pdirent->d_name, "..") || !strcmp(pdirent->d_name, ".")) /* Ignore . and .. */
+    filepath = malloc(sizeof(directorypath) + (1 * sizeof(char)));
+    strcpy(filepath, directorypath);
+
+    if (!strcmp(pdirent->d_name, "..") || !strcmp(pdirent->d_name, ".")) { /* Ignore . and .. */
+      free(filepath);
       continue;
-    // TODO: calcular o nome da string, alocar e depois concatenar
+    }
+
     strcat(strcat(filepath, "/"), pdirent->d_name); /* Concatenate the filepath with the directory's name */
     check_file(filepath);
+    free(filepath);
   }
   closedir(pdir);
 }
