@@ -1,0 +1,11 @@
+examples/docx_true.docx
+examples/docx_fake.docx
+examples/gif_true.gif
+examples/locked.gif
+examples/html_true.html
+examples/jpg_true.jpg
+examples/mp4_true.mp4
+examples/pdf_true.pdf
+examples/png_fake.png
+examples/png_true.png
+examples/zip_true.zip

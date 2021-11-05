@@ -6,8 +6,8 @@
  * funções malloc e free
  * @version 1
  */
-#ifndef _MEMORY_H_
-#define _MEMORY_H_
+#ifndef MEMORY_H_INCLUDED
+#define MEMORY_H_INCLUDED
 
 #include <stdlib.h>
 
@@ -29,4 +29,4 @@ void *swap_bytes(void *source, void *dest, size_t num_bytes);
  */
 #define FREE(ptr) eipa_free((void **)(&(ptr)), __LINE__, __FILE__)
 
-#endif /* _MEMORY_H_ */
+#endif /* MEMORY_H_INCLUDED */

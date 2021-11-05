@@ -1,114 +1,85 @@
 /**
  * @file main.c
- * @brief Description
- * @date 2021-1-1
- * @author name of author
+ * @brief This program checks whether the file extension of the given file(s) matches its MIME type
+ * @date 2021-11-01
+ * @author Alexandre Jerónimo
+ * @author Leonardo Paulo
  */
 
 // https://stackoverflow.com/questions/7292642/grabbing-output-from-exec
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
+#include "functions.h"
 
-#include "args.h"
-#include "debug.h"
-#include "memory.h"
-
-#define MAX 124
-
-//? Tem que ser global?
-char **filepath = NULL;
-char *directorypath = NULL;
+// int continua = 1;
 
 int main(int argc, char *argv[]) {
+  time_t rawtime;
+  struct tm *tm;
+
+  /* Stores time at which the program was initiated */
+  time(&rawtime);
+  tm = localtime(&rawtime);
+  strftime(timeFormatted, MAX, "%Y.%m.%d_%H:%M:%S", tm);
+
   /* Gengetopt */
   struct gengetopt_args_info args;
   if (cmdline_parser(argc, argv, &args) != 0)
     exit(1);
 
   if (argc < 2) {
-    // TODO: Concluir mensagem de erro
-    fprintf(stderr, "[ERROR] must have at least one argument! usage: ...\n");
+    printf("Usage: checkFile [OPTION]...\nTry 'checkFile --help' for more information.\n");
     exit(1);
   }
 
-  if (args.file_given)
-    filepath = args.file_arg;
-  if (args.dir_given)
-    directorypath = args.dir_arg;
+  struct sigaction act;
 
-  for (unsigned int i = 0; i < args.file_given; i++) {
-    char mimetype[MAX] = "\0";
-    char *filetype, *filename = filepath[i], *extension = strrchr(filepath[i], '.') + 1;
+  /* Prepare the signal handler function */
+  act.sa_handler = signal_handler;
+  act.sa_flags = 0;
+  sigemptyset(&act.sa_mask);
 
-    // If the given file is inside a directory
-    if (strchr(filepath[i], '/'))
-      filename = strrchr(filepath[i], '/') + 1;
+  /* Capture SIGUSR1 */
+  if (sigaction(SIGUSR1, &act, NULL) < 0)
+    ERROR(1, "sigaction - SIGUSR1");
 
-    // Check if the given file exists
-    if (access(filepath[i], F_OK) != 0) {
-      fprintf(stderr, "[ERROR] cannot open file '%s' -- No such file or directory\n", filepath[i]);
-      continue;
-    }
+  /* Capture SIGQUIT */
+  if (sigaction(SIGQUIT, &act, NULL) < 0)
+    ERROR(2, "sigaction - SIGQUIT");
 
-    // If the given file's name doesn't have an extension
-    if (!strchr(filepath[i], '.')) {
-      fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkFile\n", filepath[i]);
-      continue;
-    }
+  // printf("O programa esta pronto a receber os signals SIGQUIT e SIGUSR1\n");
+  // printf("PID do processo: %d\n", getpid());
 
-    int link[2];
-    pipe(link);
-    pid_t pid = fork();
-
-    switch (pid) {
-      case -1: /* Error */
-        ERROR(1, "fork() failed!\n");
-        break;
-      case 0: /* Child */
-              // Change output to stdout
-        if (dup2(link[1], STDOUT_FILENO) == -1)
-          ERROR(1, "dup2() failed!\n");
-        close(link[0]);
-        close(link[1]);
-        execlp("file", "file", "--mime-type", "-b", filepath[i], NULL);
-        ERROR(1, "execlp() failed!\n");
-        break;
-      default: /* Parent */
-        if (wait(NULL) == -1)
-          ERROR(1, "wait() failed!\n");
-        close(link[1]);
-
-        // Read the output from the child (Interprocess Communication)
-        if (read(link[0], mimetype, sizeof(mimetype)) == -1)
-          ERROR(1, "read() failed!\n");
-
-        mimetype[strlen(mimetype) - 1] = '\0';  // Removes the unecessary line break
-        filetype = strchr(mimetype, '/') + 1;   // Gets the file type from the MIME type
-
-        // Check if the file type is supported
-        if (strcmp(extension, "pdf") && strcmp(extension, "gif") && strcmp(extension, "jpg") &&
-            strcmp(extension, "png") && strcmp(extension, "mp4") && strcmp(extension, "zip") &&
-            strcmp(extension, "html")) {
-          fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimetype);
-          continue;
-        }
-
-        // Check whether the extension matches the file type
-        if (!strcmp(extension, filetype))
-          printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, filetype);
-        else if (strcmp(extension, filetype) && !strcmp(filetype, "jpeg") && !strcmp(extension, "jpg"))
-          printf("[OK] '%s': extension '%s' matches file type '%s'\n", filename, extension, filetype);
-        else
-          printf("[MISMATCH] '%s': extension is '%s', file type is '%s'\n", filename, extension, filetype);
-    }
+  /* Analyse all the files given through -f */
+  if (args.file_given) {
+    char **filepaths = args.file_arg;
+    size_t nFiles = args.file_given;
+    for (size_t i = 0; i < nFiles; i++) check_file(filepaths[i]);
   }
+
+  /* Read the given -b file and analyses its paths */
+  if (args.batch_given) {
+    char *filelist = args.batch_arg;
+    check_batch(filelist);
+  } else
+    /* Ignore SIGUSR1 for -f and -d modes */
+    signal(SIGUSR1, SIG_IGN);
+
+  /* Analyse the files inside the given directory (-d) */
+  if (args.dir_given) {
+    char *directorypath = args.dir_arg;
+    check_dir(directorypath);
+  }
+
+  /* Prints a summary of the analysed files on -d and -b modes */
+  if (args.dir_given || args.batch_given) {
+    int totalCount = okCount + misCount + errCount;
+    printf("[SUMMARY] files analysed: %d; files OK: %d; mismatches: %d; errors: %d\n", totalCount, okCount, misCount, errCount);
+  }
+
+  // while (continua) {
+  //   pause();
+  //   printf("Pause interrompido\n");
+  // }
+
   return 0;
 }
