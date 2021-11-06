@@ -29,7 +29,7 @@ int is_file_valid(char *filepath) {
 
   /* If the given file's name doesn't have an extension */
   if (!strchr(filepath, '.')) {
-    fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkFile\n", filepath);
+    fprintf(stderr, "[INFO] '%s': files with no extension are not supported by checkfile\n", filepath);
     return 0;
   }
 
@@ -53,7 +53,7 @@ int is_file_supported(char *filename, char *filetype, char mimetype[]) {
       fprintf(stderr, "[INFO] '%s': file must not be empty\n", filename);
       return 0;
     }
-    fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkFile\n", filename, mimetype);
+    fprintf(stderr, "[INFO] '%s': type '%s' is not supported by checkfile\n", filename, mimetype);
     return 0;
   }
   return 1;

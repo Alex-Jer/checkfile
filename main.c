@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
     exit(1);
 
   if (argc < 2) {
-    printf("Usage: checkFile [OPTION]...\nTry 'checkFile --help' for more information.\n");
+    printf("Usage: checkfile [OPTION]...\nTry 'checkfile --help' for more information.\n");
     exit(1);
   }
 

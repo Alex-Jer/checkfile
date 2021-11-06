@@ -3,4 +3,4 @@
 /examples/locked.*
 *.o
 args.*
-checkFile
+checkfile
