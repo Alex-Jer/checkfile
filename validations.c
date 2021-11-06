@@ -2,8 +2,8 @@
  * @file validations.c
  * @brief Multiple validation functions to ensure a healthy execution of the program
  * @date 2021-11-01
- * @author Alexandre Jerónimo
- * @author Leonardo Paulo
+ * @author Alexandre Leal Marques Batista Jerónimo - 2201799
+ * @author Leonardo Jacinto Paulo - 2201783
  */
 
 #include "validations.h"

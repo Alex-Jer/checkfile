@@ -2,8 +2,8 @@
  * @file functions.h
  * @brief Functions to be used in main.c
  * @date 2021-11-01
- * @author Alexandre Jerónimo
- * @author Leonardo Paulo
+ * @author Alexandre Leal Marques Batista Jerónimo - 2201799
+ * @author Leonardo Jacinto Paulo - 2201783
  */
 
 #ifndef FUNCTIONS_H_INCLUDED

@@ -2,7 +2,7 @@
  * @file validations.h
  * @brief Multiple validation functions to ensure a healthy execution of the program
  * @date 2021-11-01
- * @author Alexandre Jerónimo
+ * @author Alexandre Leal Marques Batista Jerónimo - 2201799
  * @author Leonardo Jacinto
  */
 
